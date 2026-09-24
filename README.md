@@ -136,7 +136,22 @@ resume-tailor \
 
 ---
 
+### Option D: Docker (Zero-Install)
+If you don't have TeX Live or Python 3.12 installed locally, run via Docker:
+
+```bash
+# Launch interactive assistant in Docker
+docker compose run --rm resume-tailor
+
+# Or pass URL shorthand directly
+docker compose run --rm resume-tailor "https://careers.allianz.com/de/de/job/102747/AI-Engineer-f-m-d"
+```
+*(All generated PDFs and tailored source files are automatically synced to your host `./applications/` folder).*
+
+---
+
 ## Output Structure
+
 
 Every application is neatly organized in its own company folder:
 

@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  resume-tailor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resume-tailor
+    env_file:
+      - .env
+    volumes:
+      - ./applications:/app/applications
+      - ./base_resume:/app/base_resume:ro
+    stdin_open: true
+    tty: true
+    entrypoint: ["resume-tailor"]
