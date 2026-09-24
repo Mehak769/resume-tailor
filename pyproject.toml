@@ -1,0 +1,66 @@
+[project]
+    name = "resume-tailor"
+    version = "0.1.0"
+    description = "Production-grade CLI tool to intelligently tailor resumes for job descriptions using LLMs"
+    readme = "README.md"
+    requires-python = ">=3.12"
+    authors = [
+        { name = "Mehak", email = "mehak1815719@gmail.com" }
+    ]
+    dependencies = [
+        "typer[all]>=0.12.0",
+        "rich>=13.7.0",
+        "pydantic>=2.7.0",
+        "pydantic-settings>=2.2.0",
+        "python-docx>=1.1.0",
+        "pypdf>=4.2.0",
+        "trafilatura>=1.8.0",
+        "litellm>=1.35.0",
+        "jinja2>=3.1.3",
+        "weasyprint>=61.0",
+    ]
+    
+    [project.optional-dependencies]
+    dev = [
+        "pytest>=8.1.0",
+        "pytest-asyncio>=0.23.0",
+        "pytest-mock>=3.14.0",
+        "ruff>=0.4.0",
+        "mypy>=1.9.0",
+        "pre-commit>=3.7.0",
+        "types-requests>=2.31.0",
+    ]
+    
+    [project.scripts]
+    resume-tailor = "resume_tailor.cli:app"
+    
+    [build-system]
+    requires = ["uv_build>=0.12.5,<0.13.0"]
+    build-backend = "uv_build"
+    
+    [tool.ruff]
+    target-version = "py312"
+    line-length = 100
+    
+    [tool.ruff.lint]
+    select = [
+        "E",   # pycodestyle errors
+        "W",   # pycodestyle warnings
+        "F",   # pyflakes
+        "I",   # isort
+        "B",   # flake8-bugbear
+        "UP",  # pyupgrade
+        "C4",  # flake8-comprehensions
+    ]
+    ignore = ["E501"]
+    
+    [tool.mypy]
+    python_version = "3.12"
+    strict = true
+    warn_unused_configs = true
+    ignore_missing_imports = true
+    
+    [tool.pytest.ini_options]
+    minversion = "8.0"
+    addopts = "-ra -q --strict-markers"
+    testpaths = ["tests"]
