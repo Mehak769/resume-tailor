@@ -12,9 +12,10 @@ from rich.tree import Tree
 
 from resume_tailor.config import settings
 from resume_tailor.core.exceptions import JobDescriptionScraperError, ResumeTailorError
-from resume_tailor.core.logging import setup_logging
+from resume_tailor.core.logging import logger, setup_logging
 from resume_tailor.core.models import JobDescription
 from resume_tailor.exporters.base import BaseResumeExporter
+from resume_tailor.exporters.cover_letter_exporter import CoverLetterExporter
 from resume_tailor.exporters.docx_exporter import DocxResumeExporter
 from resume_tailor.exporters.latex_exporter import LaTeXResumeExporter
 from resume_tailor.exporters.pdf_exporter import PDFResumeExporter
@@ -99,6 +100,13 @@ def tailor(
         str | None,
         typer.Option("--model", "-m", help="Override LLM model name"),
     ] = None,
+    cover_letter: Annotated[
+        bool,
+        typer.Option(
+            "--cover-letter/--no-cover-letter",
+            help="Generate matching tailored cover letter (.tex and .pdf)",
+        ),
+    ] = True,
     dry_run: Annotated[
         bool,
         typer.Option(
@@ -171,6 +179,12 @@ def tailor(
                     "[bold green]4.[/bold green] Preview optimizations first (dry-run)?",
                     default=False,
                 )
+                if not dry_run:
+                    cover_letter = Confirm.ask(
+                        "[bold green]5.[/bold green] Generate matching tailored cover letter?",
+                        default=True,
+                    )
+
         else:
             console.print(
                 "[bold red]Error:[/bold red] You must provide either a Job URL, text, or use interactive mode."
@@ -302,6 +316,29 @@ def tailor(
 
             final_path = exporter.export(tailored_resume, out_file)
 
+            # Generate matching tailored cover letter if enabled
+            cl_path: Path | None = None
+            if cover_letter:
+                try:
+                    with console.status(
+                        "[bold cyan]Generating tailored cover letter with Gemini..."
+                    ):
+                        cl_data = llm_service.generate_cover_letter(
+                            resume=parsed_resume,
+                            jd=job_desc,
+                            target_company=raw_company,
+                            target_job_title=tailored_resume.target_job_title,
+                        )
+                        cl_exporter = CoverLetterExporter(compile_pdf=True)
+                        cl_out_file = company_folder / "cover_letter.tex"
+                        cl_path = cl_exporter.export(
+                            cover_letter=cl_data,
+                            contact=parsed_resume.contact_info,
+                            output_path=cl_out_file,
+                        )
+                except Exception as e:
+                    logger.warning(f"Could not generate cover letter: {e}")
+
             # Archive the exact Job Description inside the company folder
             jd_archive_path = company_folder / "job_description.txt"
             jd_archive_content = (
@@ -319,7 +356,14 @@ def tailor(
         if target_ext in {".tex", ".latex"}:
             pdf_path = final_path.with_suffix(".pdf")
             if pdf_path.exists():
-                tree.add(f"📑 [green]{pdf_path.name}[/green] (Compiled Production PDF)")
+                tree.add(f"📑 [green]{pdf_path.name}[/green] (Compiled Resume PDF)")
+
+        if cl_path and cl_path.exists():
+            tree.add(f"✉️  [green]{cl_path.name}[/green] (Tailored Cover Letter Source)")
+            cl_pdf = cl_path.with_suffix(".pdf")
+            if cl_pdf.exists():
+                tree.add(f"📑 [green]{cl_pdf.name}[/green] (Compiled Cover Letter PDF)")
+
         tree.add("📝 [dim]job_description.txt[/dim] (Archived Job Description)")
 
         console.print(

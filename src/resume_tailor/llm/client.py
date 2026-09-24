@@ -7,8 +7,15 @@ from litellm import completion
 from resume_tailor.config import settings
 from resume_tailor.core.exceptions import LLMTailoringError
 from resume_tailor.core.logging import logger
-from resume_tailor.core.models import JobDescription, ParsedResume, TailoredResume
+from resume_tailor.core.models import (
+    CoverLetter,
+    JobDescription,
+    ParsedResume,
+    TailoredResume,
+)
 from resume_tailor.llm.prompts import (
+    COVER_LETTER_SYSTEM_PROMPT,
+    COVER_LETTER_USER_PROMPT_TEMPLATE,
     RESUME_STRUCTURE_PROMPT,
     RESUME_TAILOR_SYSTEM_PROMPT,
     TAILOR_USER_PROMPT_TEMPLATE,
@@ -130,3 +137,48 @@ class LLMTailorService:
             if isinstance(e, LLMTailoringError):
                 raise
             raise LLMTailoringError(f"LLM tailoring process failed: {e}") from e
+
+    def generate_cover_letter(
+        self,
+        resume: ParsedResume,
+        jd: JobDescription,
+        target_company: str,
+        target_job_title: str,
+    ) -> CoverLetter:
+        """Generates a tailored, professional 1-page cover letter matching the candidate's experience and target role."""
+        from datetime import datetime
+
+        schema_hint = json.dumps(CoverLetter.model_json_schema(), indent=2)
+        user_prompt = COVER_LETTER_USER_PROMPT_TEMPLATE.format(
+            company=target_company,
+            job_title=target_job_title,
+            job_description=jd.raw_text,
+            candidate_profile=resume.model_dump_json(indent=2),
+        )
+
+        try:
+            content = self._call_completion_with_fallback(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"{COVER_LETTER_SYSTEM_PROMPT}\nTarget JSON Schema:\n{schema_hint}",
+                    },
+                    {"role": "user", "content": user_prompt},
+                ],
+                response_format={"type": "json_object"},
+            )
+            data = json.loads(content)
+            cover_letter = CoverLetter.model_validate(data)
+            if not cover_letter.candidate_name:
+                cover_letter.candidate_name = resume.contact_info.name
+            if not cover_letter.target_company:
+                cover_letter.target_company = target_company
+            if not cover_letter.target_job_title:
+                cover_letter.target_job_title = target_job_title
+            if not cover_letter.date_str:
+                cover_letter.date_str = datetime.now().strftime("%B %d, %Y")
+            return cover_letter
+        except Exception as e:
+            if isinstance(e, LLMTailoringError):
+                raise
+            raise LLMTailoringError(f"Cover letter generation failed: {e}") from e

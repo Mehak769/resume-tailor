@@ -38,7 +38,7 @@ flowchart TD
     end
 
     subgraph Output ["4. Organized Application Package"]
-        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production PDF)<br>└── job_description.txt (Archived JD)"]
+        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production Resume PDF)<br>├── cover_letter.tex (Matching Cover Letter Source)<br>├── cover_letter.pdf (Compiled Cover Letter PDF)<br>└── job_description.txt (Archived JD)"]
     end
 ```
 
@@ -51,8 +51,10 @@ flowchart TD
 - **Google X-Y-Z Bullet Optimization**: Restructures experience bullets to follow the *"Accomplished [X] as measured by [Y], by doing [Z]"* framework.
 - **Strict Anti-Hallucination**: Tailors vocabulary and emphasis without inventing unheld job titles, false degrees, or fake accomplishments.
 - **Native LaTeX Workflow**: Automatically updates your `.tex` source and compiles a publication-ready `.pdf` via `pdflatex` with verified, clickable web links.
-- **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with the tailored source, PDF, and archived job description.
+- **Automated Cover Letter Generator**: Crafts an articulate, matching 1-page cover letter connecting your technical background to the target company's challenges, compiled directly to `cover_letter.pdf`.
+- **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with tailored resume, cover letter, and archived job description.
 - **Interactive Terminal Assistant**: Zero-friction wizard for new users—no long flags required.
+
 
 ---
 
@@ -140,7 +142,9 @@ Every application is neatly organized in its own company folder:
 applications/
 └── Allianz/
     ├── resume.tex           # Tailored LaTeX source code
-    ├── resume.pdf           # Compiled production PDF (ready to submit)
+    ├── resume.pdf           # Compiled production resume PDF
+    ├── cover_letter.tex     # Matching LaTeX cover letter source
+    ├── cover_letter.pdf     # Compiled 1-page cover letter PDF
     └── job_description.txt  # Archived job requirements for interview prep
 ```
 
@@ -155,6 +159,7 @@ applications/
 | `--resume` | `-r` | `base_resume/resume.tex` | Path to master resume (`.tex`, `.pdf`, `.docx`) |
 | `--jd-url` | `-u` | `None` | URL of the job posting |
 | `--jd-text` | `-t` | `None` | Raw text of the job description |
+| `--cover-letter` | | `True` | Generate matching tailored cover letter (`.tex` & `.pdf`) |
 | `--output` | `-o` | `applications/<Company>/` | Custom destination file or directory |
 | `--model` | `-m` | `gemini/gemini-3.6-flash` | Override default LLM model |
 | `--dry-run` | | `False` | Preview match score and diff table without writing files |
@@ -167,7 +172,7 @@ applications/
 The codebase enforces strict type safety and code quality:
 
 ```bash
-# Run the test suite (13/13 passing)
+# Run the test suite (15/15 passing)
 uv run pytest
 
 # Check code formatting & linting with Ruff
@@ -176,6 +181,7 @@ uv run ruff format --check .
 
 # Run strict type checking with MyPy
 uv run mypy src
+
 ```
 
 ---

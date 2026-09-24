@@ -67,3 +67,19 @@ class TailoredResume(BaseModel):
     changes: list[ChangeDiff] = Field(default_factory=list)
     ats_score_estimate: int = Field(default=0, ge=0, le=100)
     recommendations: list[str] = Field(default_factory=list)
+
+
+class CoverLetter(BaseModel):
+    candidate_name: str = ""
+    target_company: str = ""
+    target_job_title: str = ""
+    date_str: str = ""
+    recipient: str = "Hiring Team"
+    company_location: str = ""
+    salutation: str = "Dear Hiring Team,"
+    subject: str = ""
+    opening_paragraph: str = ""
+    body_paragraph_1: str = ""
+    body_paragraph_2: str = ""
+    closing_paragraph: str = ""
+    sign_off: str = "Sincerely,"
