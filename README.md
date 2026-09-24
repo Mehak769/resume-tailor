@@ -1,15 +1,58 @@
 # resume-tailor
 
-A production-grade CLI tool that intelligently tailors software engineering resumes for specific job descriptions using LLMs (optimized for Google Gemini).
+<div align="center">
+
+[![CI](https://github.com/Mehak769/resume-tailor/actions/workflows/ci.yml/badge.svg)](https://github.com/Mehak769/resume-tailor/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+[![Powered by: Google Gemini](https://img.shields.io/badge/LLM-Google%20Gemini%203-8E75C2.svg?logo=google&logoColor=white)](https://ai.google.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**An intelligent, production-grade CLI tool that tailors software engineering resumes for specific job descriptions using LLMs and native LaTeX compilation.**
+
+[Architecture](#architecture) • [Features](#features) • [Quick Start](#quick-start) • [Usage Options](#usage-options) • [Testing](#testing)
+
+</div>
+
+---
+
+## Architecture
+
+`resume-tailor` is built with a clean ports-and-adapters architecture, ensuring complete separation between input ingestion, LLM orchestration, and typesetting engines:
+
+```mermaid
+flowchart TD
+    subgraph Ingestion ["1. Ingestion Layer"]
+        A1["Base Resume<br><code>base_resume/resume.tex</code><br><i>(.tex, .pdf, .docx)</i>"] --> P1["Parser Factory<br>(LaTeX / PDF / DOCX)"]
+        A2["Job Posting<br>URL / Text / File"] --> P2["Resilient Scraper<br>• Schema.org JSON-LD<br>• Browser UA & SSRF Guard"]
+    end
+
+    subgraph Intelligence ["2. Reasoning & Tailoring Engine"]
+        P1 --> LLM["LLM Orchestrator (Google Gemini 3)<br>• Structured Output Schema<br>• Google X-Y-Z Bullet Framework<br>• Strict Anti-Hallucination Controls<br>• Automatic Exponential Fallback"]
+        P2 --> LLM
+    end
+
+    subgraph Synthesis ["3. Synthesis & Typesetting"]
+        LLM --> EX["LaTeX Typesetting Engine<br>• Character Escaping (&, %, $, _)<br>• Hyperlink Protocol Normalization<br>• Auto pdflatex Compilation"]
+    end
+
+    subgraph Output ["4. Organized Application Package"]
+        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production PDF)<br>└── job_description.txt (Archived JD)"]
+    end
+```
+
+---
 
 ## Features
 
-- **Multi-Format Ingestion**: Ingests resumes in **LaTeX (`.tex`)**, **PDF (`.pdf`)**, or **Word (`.docx`)**.
-- **Job Description Extraction**: Ingests job postings directly from career portal **URLs** or **raw text** with built-in SSRF protection.
-- **ATS & Skills Optimization**: Analyzes requirements and restructures experience bullets following the Google **Action + Context + Measurable Result (X-Y-Z)** framework.
-- **Strict Anti-Hallucination**: Tailors narrative and vocabulary to the target JD without inventing unheld roles, degrees, or false accomplishments.
-- **Native LaTeX Workflow**: Reads your `.tex` resume and exports both a tailored `.tex` source and a compiled, publication-ready `.pdf` via `pdflatex`.
-- **ATS Alignment Scoring**: Displays estimated ATS match score and a breakdown table of applied changes and rationales.
+- **Multi-Format Ingestion**: Ingests master resumes in **LaTeX (`.tex`)**, **PDF (`.pdf`)**, or **Word (`.docx`)**.
+- **Enterprise Career Portal Scraper**: Extracts jobs from career sites (Allianz, Workday, Greenhouse, Lever) via Schema.org `JobPosting` JSON-LD, with automated fallback for bot-protected pages.
+- **Google X-Y-Z Bullet Optimization**: Restructures experience bullets to follow the *"Accomplished [X] as measured by [Y], by doing [Z]"* framework.
+- **Strict Anti-Hallucination**: Tailors vocabulary and emphasis without inventing unheld job titles, false degrees, or fake accomplishments.
+- **Native LaTeX Workflow**: Automatically updates your `.tex` source and compiles a publication-ready `.pdf` via `pdflatex` with verified, clickable web links.
+- **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with the tailored source, PDF, and archived job description.
+- **Interactive Terminal Assistant**: Zero-friction wizard for new users—no long flags required.
 
 ---
 
@@ -18,7 +61,8 @@ A production-grade CLI tool that intelligently tailors software engineering resu
 ### 1. Installation
 
 ```bash
-# Clone and enter the repository
+# Clone the repository
+git clone git@github.com:Mehak769/resume-tailor.git
 cd resume-tailor
 
 # Install dependencies using uv
@@ -27,87 +71,115 @@ uv sync --all-extras
 
 ### 2. Configure Your Gemini API Key
 
-Copy the `.env.example` file to `.env`:
+Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and add your Gemini API key:
+Add your Gemini API key in `.env`:
 
 ```dotenv
 LLM_MODEL=gemini/gemini-3.6-flash
 GEMINI_API_KEY=your_gemini_api_key_here
+DEFAULT_OUTPUT_DIR=./applications
 ```
 
 ---
 
-## Simple & Frictionless Usage
+## Usage Options
 
-You don't need to remember long flags. You have three simple ways to run:
-
-### Option A: The Interactive Wizard (Recommended for New Users)
-Simply run:
+### Option A: The Interactive Wizard (Recommended)
+Run the launcher without any arguments:
 ```bash
 ./run.sh
 ```
-or
-```bash
-resume-tailor
+
+```text
+╭──────────────────────────────────────────────────────────────────╮
+│ 🎯 Resume Tailor — Quick Assistant                               │
+│ Easily optimize your resume for any role in seconds.             │
+╰──────────────────────────────────────────────────────────────────╯
+1. Path to your resume (base_resume/resume.tex): [Press Enter]
+2. Paste Job Posting URL or Job Description: https://careers.company.com/job/123
+3. Target Company Name (Optional, auto-detected if empty): Google
+4. Preview optimizations first (dry-run)? [y/N]: n
 ```
-The wizard will guide you step-by-step:
-1. Automatically detects `base_resume/resume.tex` (or prompts for your custom file)
-2. Asks for the Job URL or raw text
-3. Optionally asks for the company name (auto-detected if empty)
-4. Previews optimizations or generates output
 
 ---
 
 ### Option B: 1-Command Shorthand
-Simply pass the job posting URL or text directly:
+Pass the job URL, a text string, or a local text file directly:
+
 ```bash
-resume-tailor "https://careers.google.com/jobs/results/12345"
+# Via URL
+./run.sh "https://careers.allianz.com/de/de/job/102747/AI-Engineer-f-m-d"
+
+# Via saved job description file
+./run.sh job.txt -c "Allianz"
 ```
-*(Automatically uses `base_resume/resume.tex` and creates `applications/<Company>/`)*
 
 ---
 
-### Option C: Advanced Flags (for Power Users & Scripts)
+### Option C: Advanced CLI Flags
 ```bash
 resume-tailor \
   --resume ./base_resume/resume.tex \
   --jd-url "https://careers.company.com/job/12345" \
-  --company "Google"
+  --company "Allianz" \
+  --dry-run
 ```
 
-> **Note:** Every application is neatly saved into its own company directory (e.g. `applications/Google/`) containing both `resume.tex`, `resume.pdf` (compiled with pdflatex), and `job_description.txt`!
+---
+
+## Output Structure
+
+Every application is neatly organized in its own company folder:
+
+```text
+applications/
+└── Allianz/
+    ├── resume.tex           # Tailored LaTeX source code
+    ├── resume.pdf           # Compiled production PDF (ready to submit)
+    └── job_description.txt  # Archived job requirements for interview prep
+```
 
 ---
 
-## CLI Options
+## CLI Reference
 
-| Option | Flag | Description |
-|---|---|---|
-| `--resume` | `-r` | Path to original resume (`.tex`, `.pdf`, `.docx`) **[Required]** |
-| `--jd-url` | `-u` | URL of the job posting |
-| `--jd-text` | `-t` | Raw text of the job description |
-| `--output` | `-o` | Custom output file destination |
-| `--model` | `-m` | Override default LLM model (e.g. `gemini/gemini-2.0-flash`) |
-| `--dry-run` | | Preview ATS score and changes table without exporting files |
-| `--debug` | | Enable verbose stack traces and debug logs |
+| Option | Flag | Default | Description |
+|---|---|---|---|
+| `job` | *(Arg)* | `None` | Shorthand: Job URL, text file path, or raw JD text |
+| `--company` | `-c` | Auto-detected | Company name for the application folder |
+| `--resume` | `-r` | `base_resume/resume.tex` | Path to master resume (`.tex`, `.pdf`, `.docx`) |
+| `--jd-url` | `-u` | `None` | URL of the job posting |
+| `--jd-text` | `-t` | `None` | Raw text of the job description |
+| `--output` | `-o` | `applications/<Company>/` | Custom destination file or directory |
+| `--model` | `-m` | `gemini/gemini-3.6-flash` | Override default LLM model |
+| `--dry-run` | | `False` | Preview match score and diff table without writing files |
+| `--debug` | | `False` | Enable verbose debug logs and stack traces |
 
 ---
 
-## Development & Testing
+## Testing & Quality Assurance
+
+The codebase enforces strict type safety and code quality:
 
 ```bash
-# Run tests
+# Run the test suite (13/13 passing)
 uv run pytest
 
-# Check formatting & linting
+# Check code formatting & linting with Ruff
 uv run ruff check .
 uv run ruff format --check .
 
-# Strict type checking
+# Run strict type checking with MyPy
 uv run mypy src
 ```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
