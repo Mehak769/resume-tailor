@@ -191,6 +191,16 @@ uv run mypy src
 
 ---
 
+## Community & Contributing
+
+Contributions are welcome! Please check our community guidelines:
+- [Contributing Guide](CONTRIBUTING.md) — Setup instructions and development standards
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Community standards and enforcement
+- [Security Policy](SECURITY.md) — Responsible vulnerability disclosure
+
+---
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

@@ -1,0 +1,75 @@
+name: 🐛 Bug Report
+description: Create a report to help us fix a bug in resume-tailor
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please ensure that you do **not** include sensitive API keys or personal contact details in this report.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened and what you expected to happen instead...
+    validations:
+      required: true
+  - type: dropdown
+    id: resume_format
+    attributes:
+      label: Resume Input Format
+      description: What format was your master resume in?
+      options:
+        - "LaTeX (.tex)"
+        - "PDF (.pdf)"
+        - "Word (.docx)"
+        - "Other / Plain Text"
+    validations:
+      required: true
+  - type: dropdown
+    id: jd_source
+    attributes:
+      label: Job Description Ingestion Mode
+      description: How did you supply the job description?
+      options:
+        - "Interactive Assistant Wizard (./run.sh)"
+        - "Direct URL scraping (--jd-url / positional URL)"
+        - "Local text file (job.txt)"
+        - "Pasted text / terminal standard input"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this behavior?
+      placeholder: |
+        1. Run command: `./run.sh ...`
+        2. Enter input: `...`
+        3. See error: `...`
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal Output & Logs
+      description: Run with `--debug` and paste relevant logs or stack traces here.
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS version, Python version, pdflatex version (if applicable)
+      placeholder: Ubuntu 24.04 / Python 3.12.3 / TeX Live 2026
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Security & Pre-Check
+      options:
+        - label: I have verified that no API keys (GEMINI_API_KEY, etc.) or private credentials are in this report.
+          required: true
+        - label: I have verified that I am using the latest version on the `main` branch.
+          required: true

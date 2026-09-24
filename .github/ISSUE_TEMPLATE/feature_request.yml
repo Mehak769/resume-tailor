@@ -1,0 +1,36 @@
+name: 🚀 Feature Request
+description: Suggest an idea or enhancement for resume-tailor
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve resume-tailor! Please describe the feature you would like to see.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a specific workflow problem or limitation?
+      placeholder: I always struggle when... / It would be much easier if...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe what you want to happen and how you envision the user experience.
+      placeholder: A clear and concise description of what you envision...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you've evaluated?
+      placeholder: I considered using...
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any mockups, screenshots, sample LaTeX snippets, or references.
