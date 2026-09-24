@@ -8,12 +8,15 @@ from resume_tailor.config import settings
 from resume_tailor.core.exceptions import LLMTailoringError
 from resume_tailor.core.logging import logger
 from resume_tailor.core.models import (
+    ApplicationAnalysis,
     CoverLetter,
     JobDescription,
     ParsedResume,
     TailoredResume,
 )
 from resume_tailor.llm.prompts import (
+    ANALYSIS_SYSTEM_PROMPT,
+    ANALYSIS_USER_PROMPT_TEMPLATE,
     COVER_LETTER_SYSTEM_PROMPT,
     COVER_LETTER_USER_PROMPT_TEMPLATE,
     RESUME_STRUCTURE_PROMPT,
@@ -182,3 +185,45 @@ class LLMTailorService:
             if isinstance(e, LLMTailoringError):
                 raise
             raise LLMTailoringError(f"Cover letter generation failed: {e}") from e
+
+    def generate_analysis(
+        self,
+        resume: ParsedResume,
+        jd: JobDescription,
+        tailored_resume: TailoredResume,
+        target_company: str,
+    ) -> ApplicationAnalysis:
+        """Generates a comprehensive Match Analysis and Interview Preparation kit."""
+        schema_hint = json.dumps(ApplicationAnalysis.model_json_schema(), indent=2)
+        user_prompt = ANALYSIS_USER_PROMPT_TEMPLATE.format(
+            company=target_company,
+            job_title=tailored_resume.target_job_title,
+            ats_score=tailored_resume.ats_score_estimate,
+            job_description=jd.raw_text,
+            candidate_resume=resume.model_dump_json(indent=2),
+        )
+
+        try:
+            content = self._call_completion_with_fallback(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"{ANALYSIS_SYSTEM_PROMPT}\nTarget JSON Schema:\n{schema_hint}",
+                    },
+                    {"role": "user", "content": user_prompt},
+                ],
+                response_format={"type": "json_object"},
+            )
+            data = json.loads(content)
+            analysis = ApplicationAnalysis.model_validate(data)
+            if not analysis.target_company:
+                analysis.target_company = target_company
+            if not analysis.target_job_title:
+                analysis.target_job_title = tailored_resume.target_job_title
+            if not analysis.ats_score_estimate:
+                analysis.ats_score_estimate = tailored_resume.ats_score_estimate
+            return analysis
+        except Exception as e:
+            if isinstance(e, LLMTailoringError):
+                raise
+            raise LLMTailoringError(f"Analysis generation failed: {e}") from e

@@ -38,7 +38,7 @@ flowchart TD
     end
 
     subgraph Output ["4. Organized Application Package"]
-        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production Resume PDF)<br>├── cover_letter.tex (Matching Cover Letter Source)<br>├── cover_letter.pdf (Compiled Cover Letter PDF)<br>└── job_description.txt (Archived JD)"]
+        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production Resume PDF)<br>├── cover_letter.tex (Matching Cover Letter Source)<br>├── cover_letter.pdf (Compiled Cover Letter PDF)<br>├── analysis.md (Match Analysis & Interview Prep Kit)<br>└── job_description.txt (Archived JD)"]
     end
 ```
 
@@ -52,8 +52,10 @@ flowchart TD
 - **Strict Anti-Hallucination**: Tailors vocabulary and emphasis without inventing unheld job titles, false degrees, or fake accomplishments.
 - **Native LaTeX Workflow**: Automatically updates your `.tex` source and compiles a publication-ready `.pdf` via `pdflatex` with verified, clickable web links.
 - **Automated Cover Letter Generator**: Crafts an articulate, matching 1-page cover letter connecting your technical background to the target company's challenges, compiled directly to `cover_letter.pdf`.
-- **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with tailored resume, cover letter, and archived job description.
+- **Match Analysis & Interview Prep Kit**: Generates a strategic dossier (`analysis.md`) featuring ATS match metrics, skill gaps, resume change audit logs, targeted technical/behavioral interview questions with talking points, and smart questions to ask the interviewer.
+- **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with tailored resume, cover letter, analysis report, and archived job description.
 - **Interactive Terminal Assistant**: Zero-friction wizard for new users—no long flags required.
+
 
 
 ---
@@ -145,6 +147,7 @@ applications/
     ├── resume.pdf           # Compiled production resume PDF
     ├── cover_letter.tex     # Matching LaTeX cover letter source
     ├── cover_letter.pdf     # Compiled 1-page cover letter PDF
+    ├── analysis.md          # Strategic match analysis & interview prep kit
     └── job_description.txt  # Archived job requirements for interview prep
 ```
 
@@ -160,6 +163,7 @@ applications/
 | `--jd-url` | `-u` | `None` | URL of the job posting |
 | `--jd-text` | `-t` | `None` | Raw text of the job description |
 | `--cover-letter` | | `True` | Generate matching tailored cover letter (`.tex` & `.pdf`) |
+| `--analysis` | | `True` | Generate match analysis & interview prep kit (`analysis.md`) |
 | `--output` | `-o` | `applications/<Company>/` | Custom destination file or directory |
 | `--model` | `-m` | `gemini/gemini-3.6-flash` | Override default LLM model |
 | `--dry-run` | | `False` | Preview match score and diff table without writing files |
@@ -172,7 +176,7 @@ applications/
 The codebase enforces strict type safety and code quality:
 
 ```bash
-# Run the test suite (15/15 passing)
+# Run the test suite (17/17 passing)
 uv run pytest
 
 # Check code formatting & linting with Ruff
@@ -181,6 +185,7 @@ uv run ruff format --check .
 
 # Run strict type checking with MyPy
 uv run mypy src
+
 
 ```
 

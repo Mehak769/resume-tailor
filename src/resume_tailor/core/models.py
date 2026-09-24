@@ -83,3 +83,20 @@ class CoverLetter(BaseModel):
     body_paragraph_2: str = ""
     closing_paragraph: str = ""
     sign_off: str = "Sincerely,"
+
+
+class InterviewQuestion(BaseModel):
+    category: str = "Technical"  # Technical, Behavioral, System Design
+    question: str
+    why_asked: str = ""
+    recommended_talking_points: list[str] = Field(default_factory=list)
+
+
+class ApplicationAnalysis(BaseModel):
+    target_company: str = ""
+    target_job_title: str = ""
+    ats_score_estimate: int = Field(default=0, ge=0, le=100)
+    key_strengths: list[str] = Field(default_factory=list)
+    skill_gaps_or_suggestions: list[str] = Field(default_factory=list)
+    interview_questions: list[InterviewQuestion] = Field(default_factory=list)
+    smart_questions_to_ask_interviewer: list[str] = Field(default_factory=list)

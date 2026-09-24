@@ -14,6 +14,7 @@ from resume_tailor.config import settings
 from resume_tailor.core.exceptions import JobDescriptionScraperError, ResumeTailorError
 from resume_tailor.core.logging import logger, setup_logging
 from resume_tailor.core.models import JobDescription
+from resume_tailor.exporters.analysis_exporter import AnalysisExporter
 from resume_tailor.exporters.base import BaseResumeExporter
 from resume_tailor.exporters.cover_letter_exporter import CoverLetterExporter
 from resume_tailor.exporters.docx_exporter import DocxResumeExporter
@@ -105,6 +106,13 @@ def tailor(
         typer.Option(
             "--cover-letter/--no-cover-letter",
             help="Generate matching tailored cover letter (.tex and .pdf)",
+        ),
+    ] = True,
+    analysis: Annotated[
+        bool,
+        typer.Option(
+            "--analysis/--no-analysis",
+            help="Generate match analysis & interview prep report (analysis.md)",
         ),
     ] = True,
     dry_run: Annotated[
@@ -339,6 +347,29 @@ def tailor(
                 except Exception as e:
                     logger.warning(f"Could not generate cover letter: {e}")
 
+            # Generate Match Analysis & Interview Prep Report if enabled
+            analysis_path: Path | None = None
+            if analysis:
+                try:
+                    with console.status(
+                        "[bold cyan]Generating match analysis & interview prep report with Gemini..."
+                    ):
+                        analysis_data = llm_service.generate_analysis(
+                            resume=parsed_resume,
+                            jd=job_desc,
+                            tailored_resume=tailored_resume,
+                            target_company=raw_company,
+                        )
+                        analysis_exporter = AnalysisExporter()
+                        analysis_out_file = company_folder / "analysis.md"
+                        analysis_path = analysis_exporter.export(
+                            analysis=analysis_data,
+                            tailored_resume=tailored_resume,
+                            output_path=analysis_out_file,
+                        )
+                except Exception as e:
+                    logger.warning(f"Could not generate analysis report: {e}")
+
             # Archive the exact Job Description inside the company folder
             jd_archive_path = company_folder / "job_description.txt"
             jd_archive_content = (
@@ -363,6 +394,11 @@ def tailor(
             cl_pdf = cl_path.with_suffix(".pdf")
             if cl_pdf.exists():
                 tree.add(f"📑 [green]{cl_pdf.name}[/green] (Compiled Cover Letter PDF)")
+
+        if analysis_path and analysis_path.exists():
+            tree.add(
+                f"📊 [green]{analysis_path.name}[/green] (Match Analysis & Interview Prep Report)"
+            )
 
         tree.add("📝 [dim]job_description.txt[/dim] (Archived Job Description)")
 

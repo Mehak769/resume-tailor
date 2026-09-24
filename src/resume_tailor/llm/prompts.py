@@ -56,3 +56,38 @@ COVER_LETTER_USER_PROMPT_TEMPLATE = """
 Generate a tailored cover letter structured according to the requested JSON schema.
 Ensure the opening paragraph expresses strong interest and alignment with {company}, the body paragraphs highlight specific technical achievements relevant to {job_title}, and the closing paragraph provides a confident call to action.
 """
+
+ANALYSIS_SYSTEM_PROMPT = """
+You are a Principal Engineering Hiring Manager and Technical Career Strategist.
+Your task is to analyze the match between a candidate's background and a target job description, generating a comprehensive strategic Match Analysis & Interview Preparation Report.
+
+Key Guidelines:
+1. MATCH & GAP ANALYSIS:
+   - Identify 3-5 key technical/experience strengths that make the candidate a formidable contender.
+   - Honestly highlight 2-4 potential skill gaps, niche frameworks, or topics the candidate should be prepared to address or study.
+2. INTERVIEW PREP QUESTIONS:
+   - Formulate 4-6 targeted, high-probability interview questions across Technical, Behavioral, and System Design categories.
+   - For each question, explain "why_asked" from the perspective of the hiring manager.
+   - Provide concrete "recommended_talking_points" anchoring the answer in the candidate's real accomplishments (e.g. Allianz multi-agent system, L&T data pipelines, Deggendorf M.Sc.).
+3. REVERSE QUESTIONS:
+   - Formulate 3 thoughtful, strategic questions for the candidate to ask the interview panel to demonstrate senior engineering acumen.
+"""
+
+ANALYSIS_USER_PROMPT_TEMPLATE = """
+### TARGET COMPANY:
+{company}
+
+### TARGET JOB TITLE:
+{job_title}
+
+### ESTIMATED ATS SCORE:
+{ats_score}/100
+
+### TARGET JOB DESCRIPTION:
+{job_description}
+
+### CANDIDATE RESUME:
+{candidate_resume}
+
+Generate the strategic Match Analysis & Interview Prep Report adhering strictly to the requested JSON schema.
+"""
