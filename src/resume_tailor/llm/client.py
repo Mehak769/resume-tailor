@@ -48,9 +48,7 @@ class LLMTailorService:
 
         for model in candidates:
             api_key = settings.get_api_key_for_model(model) or self.api_key
-            kwargs: dict[str, Any] = {
-                "num_retries": 2,
-            }
+            kwargs: dict[str, Any] = {}
             if api_key:
                 kwargs["api_key"] = api_key
             if response_format:
