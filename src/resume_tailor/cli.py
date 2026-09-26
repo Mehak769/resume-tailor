@@ -255,7 +255,7 @@ def tailor(
                 raise
 
         # 3. LLM Orchestration
-        with console.status("[bold cyan]Structuring and tailoring resume with Gemini..."):
+        with console.status("[bold cyan]Structuring and tailoring resume with LLM..."):
             llm_service = LLMTailorService(model_name=model)
             # Hydrate structure if raw text only
             if not parsed_resume.experience and parsed_resume.raw_text:

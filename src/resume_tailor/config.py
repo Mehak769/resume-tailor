@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
+    openrouter_api_key: str | None = None
     llm_temperature: float = 0.2
     llm_max_tokens: int = 4096
 
@@ -25,15 +26,25 @@ class Settings(BaseSettings):
 
     def get_api_key_for_model(self, model_name: str) -> str | None:
         """Resolves the appropriate API key based on the model prefix or direct settings."""
+        key: str | None = None
         if self.llm_api_key:
-            return self.llm_api_key
-        if model_name.startswith("gemini/") or "gemini" in model_name:
-            return self.gemini_api_key
-        if model_name.startswith("openai/") or "gpt" in model_name:
-            return self.openai_api_key
-        if model_name.startswith("anthropic/") or "claude" in model_name:
-            return self.anthropic_api_key
-        return None
+            key = self.llm_api_key
+        elif model_name.startswith("openrouter/"):
+            key = self.openrouter_api_key
+        elif model_name.startswith("gemini/") or (
+            "gemini" in model_name and not model_name.startswith("openrouter/")
+        ):
+            key = self.gemini_api_key
+        elif model_name.startswith("openai/") or "gpt" in model_name:
+            key = self.openai_api_key
+        elif model_name.startswith("anthropic/") or "claude" in model_name:
+            key = self.anthropic_api_key
+
+        if key:
+            key = key.strip()
+            if key.lower().startswith("bearer "):
+                key = key[7:].strip()
+        return key
 
 
 settings = Settings()

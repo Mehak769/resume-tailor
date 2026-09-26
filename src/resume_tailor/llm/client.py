@@ -25,9 +25,28 @@ from resume_tailor.llm.prompts import (
 )
 
 
+def _clean_json_response(content: str) -> str:
+    """Strips markdown code blocks (```json ... ```) from LLM output if present."""
+    cleaned = content.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+    return cleaned
+
+
 class LLMTailorService:
     def __init__(self, model_name: str | None = None) -> None:
-        self.model = model_name or settings.llm_model
+        model = model_name or settings.llm_model
+        # OpenRouter's routing models are named 'openrouter/free' and 'openrouter/auto'.
+        # In LiteLLM, passing 'openrouter/openrouter/free' strips the first 'openrouter/'
+        # provider prefix and sends model 'openrouter/free' to OpenRouter.
+        if model in ("openrouter/free", "openrouter/auto"):
+            model = f"openrouter/{model}"
+        self.model = model
         self.api_key = settings.get_api_key_for_model(self.model)
 
     def _call_completion_with_fallback(
@@ -38,7 +57,7 @@ class LLMTailorService:
         """Invokes LLM completion with automatic retries and fallback models on temporary 503 spikes."""
         # Models to try in priority order
         candidates = [self.model]
-        if "gemini" in self.model:
+        if self.model.startswith("gemini/"):
             fallbacks = ["gemini/gemini-3.5-flash-lite", "gemini/gemini-3.6-flash"]
             for fb in fallbacks:
                 if fb not in candidates:
@@ -55,7 +74,7 @@ class LLMTailorService:
                 kwargs["response_format"] = response_format
 
             # Gemini 3 models require temperature=1.0 per Google API guidance
-            if "gemini" in model:
+            if model.startswith("gemini/"):
                 kwargs["temperature"] = 1.0
             else:
                 kwargs["temperature"] = settings.llm_temperature
@@ -102,7 +121,7 @@ class LLMTailorService:
                 ],
                 response_format={"type": "json_object"},
             )
-            data = json.loads(content)
+            data = json.loads(_clean_json_response(content))
             data["raw_text"] = raw_text
             return ParsedResume.model_validate(data)
         except Exception as e:
@@ -129,7 +148,7 @@ class LLMTailorService:
                 ],
                 response_format={"type": "json_object"},
             )
-            data = json.loads(content)
+            data = json.loads(_clean_json_response(content))
             tailored = TailoredResume.model_validate(data)
             if not tailored.target_company and jd.company:
                 tailored.target_company = jd.company
@@ -168,7 +187,7 @@ class LLMTailorService:
                 ],
                 response_format={"type": "json_object"},
             )
-            data = json.loads(content)
+            data = json.loads(_clean_json_response(content))
             cover_letter = CoverLetter.model_validate(data)
             if not cover_letter.candidate_name:
                 cover_letter.candidate_name = resume.contact_info.name
@@ -212,7 +231,7 @@ class LLMTailorService:
                 ],
                 response_format={"type": "json_object"},
             )
-            data = json.loads(content)
+            data = json.loads(_clean_json_response(content))
             analysis = ApplicationAnalysis.model_validate(data)
             if not analysis.target_company:
                 analysis.target_company = target_company

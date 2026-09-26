@@ -6,9 +6,9 @@ from resume_tailor.core.exceptions import ResumeExportError
 from resume_tailor.core.models import TailoredResume
 from resume_tailor.exporters.base import BaseResumeExporter
 
-LATEX_TEMPLATE = r"""\documentclass[8.5pt,a4paper]{article}
+LATEX_TEMPLATE = r"""\documentclass[9pt,a4paper]{extarticle}
 
-\usepackage[margin=0.38in,top=0.32in,bottom=0.28in]{geometry}
+\usepackage[margin=0.36in,top=0.28in,bottom=0.24in]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage[hidelinks]{hyperref}
@@ -18,7 +18,7 @@ LATEX_TEMPLATE = r"""\documentclass[8.5pt,a4paper]{article}
 \setlength{\parskip}{0pt}
 
 \titleformat{\section}{\normalsize\bfseries}{}{0em}{}[\titlerule]
-\titlespacing{\section}{0pt}{3pt}{1.5pt}
+\titlespacing{\section}{0pt}{2.5pt}{1.5pt}
 
 \setlist[itemize]{
     leftmargin=12pt,
