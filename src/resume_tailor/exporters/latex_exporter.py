@@ -8,7 +8,11 @@ from resume_tailor.exporters.base import BaseResumeExporter
 
 LATEX_TEMPLATE = r"""\documentclass[9pt,a4paper]{extarticle}
 
-\usepackage[margin=0.36in,top=0.28in,bottom=0.24in]{geometry}
+\usepackage{cmap}
+\pdfgentounicode=1
+\pdfinterwordspaceon
+
+\usepackage[margin=0.35in,top=0.28in,bottom=0.22in]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage[hidelinks]{hyperref}
@@ -21,9 +25,9 @@ LATEX_TEMPLATE = r"""\documentclass[9pt,a4paper]{extarticle}
 \titlespacing{\section}{0pt}{2.5pt}{1.5pt}
 
 \setlist[itemize]{
-    leftmargin=12pt,
-    itemsep=0pt,
-    topsep=0.5pt,
+    leftmargin=11pt,
+    itemsep=0.5pt,
+    topsep=1pt,
     parsep=0pt,
     partopsep=0pt
 }
@@ -33,14 +37,14 @@ LATEX_TEMPLATE = r"""\documentclass[9pt,a4paper]{extarticle}
 %==================== HEADER ====================
 
 \begin{center}
-    {\Large\textbf{<NAME>}}\\[-1pt]
-    \textbf{<TAGLINE>}\\[1pt]
+    {\Large\textbf{<NAME>}}\par\vspace{1pt}
+    \textbf{<TAGLINE>}\par\vspace{2pt}
     <CONTACT_LINE>
 \end{center}
 
 %==================== PROFILE ====================
 
-\section{Professional Profile}
+\section{Professional Summary}
 
 <SUMMARY>
 
@@ -151,9 +155,19 @@ class LaTeXResumeExporter(BaseResumeExporter):
 
             # Build Skills
             if p_res.skills:
-                skills_formatted = r"\textbf{Key Competencies:} " + ", ".join(
-                    [escape_latex(s) for s in p_res.skills]
-                )
+                categorized = [s for s in p_res.skills if ":" in s]
+                if categorized:
+                    skill_lines: list[str] = []
+                    for c in categorized:
+                        parts = c.split(":", 1)
+                        cat_name = escape_latex(parts[0].strip())
+                        cat_vals = escape_latex(parts[1].strip())
+                        skill_lines.append(rf"\textbf{{{cat_name}:}} {cat_vals}\\")
+                    skills_formatted = "\n".join(skill_lines)
+                else:
+                    skills_formatted = r"\textbf{Core Competencies:} " + ", ".join(
+                        [escape_latex(s) for s in p_res.skills]
+                    )
             else:
                 skills_formatted = ""
 
@@ -165,8 +179,8 @@ class LaTeXResumeExporter(BaseResumeExporter):
                 location = escape_latex(exp.location)
                 date_str = escape_latex(f"{exp.start_date} -- {exp.end_date}".strip(" -"))
 
-                loc_line = rf"\hfill {location}\\" if location else r"\\"
-                header_line = rf"\textbf{{{role} \;|\; {company}}} {loc_line}"
+                loc_line = rf" \hfill {location}\\" if location else r"\\"
+                header_line = rf"\textbf{{{role} \;|\; {company}}}{loc_line}"
                 date_line = rf"\textit{{{date_str}}}" if date_str else ""
 
                 bullet_lines = "\n".join(
@@ -183,11 +197,11 @@ class LaTeXResumeExporter(BaseResumeExporter):
                 for proj in p_res.projects:
                     title = escape_latex(proj.title)
                     tech_str = (
-                        rf" [{', '.join([escape_latex(t) for t in proj.technologies])}]"
+                        rf" \;|\; \textit{{{', '.join([escape_latex(t) for t in proj.technologies])}}}"
                         if proj.technologies
                         else ""
                     )
-                    header = rf"\textbf{{{title}{tech_str}}}"
+                    header = rf"\textbf{{{title}}}{tech_str}"
                     bullets = "\n".join([rf"    \item {escape_latex(d)}" for d in proj.description])
                     proj_blocks.append(f"{header}\n\\begin{{itemize}}\n{bullets}\n\\end{{itemize}}")
                 projects_section = "\n\n".join(proj_blocks)
@@ -200,8 +214,8 @@ class LaTeXResumeExporter(BaseResumeExporter):
                 deg = escape_latex(edu.degree)
                 inst = escape_latex(edu.institution)
                 grad = escape_latex(edu.graduation_date)
-                grad_str = rf"\hfill \textit{{{grad}}}" if grad else ""
-                edu_blocks.append(rf"\textbf{{{deg}}} --- {inst} {grad_str}\\")
+                grad_str = rf" \hfill \textit{{{grad}}}" if grad else ""
+                edu_blocks.append(rf"\textbf{{{deg}}} --- {inst}{grad_str}\\")
             education_text = "\n".join(edu_blocks)
 
             # Assemble Document
