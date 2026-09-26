@@ -6,7 +6,7 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Powered by: Google Gemini](https://img.shields.io/badge/LLM-Google%20Gemini%203-8E75C2.svg?logo=google&logoColor=white)](https://ai.google.dev/)
+[![LLM: OpenRouter & Gemini](https://img.shields.io/badge/LLM-OpenRouter%20%7C%20Gemini%20%7C%20OpenAI-6366f1.svg)](https://openrouter.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **An intelligent, production-grade CLI tool that tailors software engineering resumes for specific job descriptions using LLMs and native LaTeX compilation.**
@@ -29,16 +29,16 @@ flowchart TD
     end
 
     subgraph Intelligence ["2. Reasoning & Tailoring Engine"]
-        P1 --> LLM["LLM Orchestrator (Google Gemini 3)<br>• Structured Output Schema<br>• Google X-Y-Z Bullet Framework<br>• Strict Anti-Hallucination Controls<br>• Automatic Exponential Fallback"]
+        P1 --> LLM["LLM Orchestrator<br>(OpenRouter / Gemini / OpenAI)<br>• Structured Output Schema<br>• Google X-Y-Z Impact Framework<br>• Strict 1-Page Budget & Anti-Hallucination<br>• Automatic Exponential Fallback"]
         P2 --> LLM
     end
 
     subgraph Synthesis ["3. Synthesis & Typesetting"]
-        LLM --> EX["LaTeX Typesetting Engine<br>• Character Escaping (&, %, $, _)<br>• Hyperlink Protocol Normalization<br>• Auto pdflatex Compilation"]
+        LLM --> EX["LaTeX Typesetting Engine<br>• 9pt extarticle Strict 1-Page Layout<br>• Character Escaping (&, %, $, _)<br>• Hyperlink Protocol Normalization<br>• Auto pdflatex Compilation"]
     end
 
     subgraph Output ["4. Organized Application Package"]
-        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled Production Resume PDF)<br>├── cover_letter.tex (Matching Cover Letter Source)<br>├── cover_letter.pdf (Compiled Cover Letter PDF)<br>├── analysis.md (Match Analysis & Interview Prep Kit)<br>└── job_description.txt (Archived JD)"]
+        EX --> PKG["applications/&lt;Company&gt;/<br>├── resume.tex (Tailored LaTeX Source)<br>├── resume.pdf (Compiled 1-Page Production PDF)<br>├── cover_letter.tex (Matching Cover Letter Source)<br>├── cover_letter.pdf (Compiled 1-Page Cover Letter PDF)<br>├── analysis.md (Match Analysis & Interview Prep Kit)<br>└── job_description.txt (Archived JD)"]
     end
 ```
 
@@ -47,16 +47,16 @@ flowchart TD
 ## Features
 
 - **Multi-Format Ingestion**: Ingests master resumes in **LaTeX (`.tex`)**, **PDF (`.pdf`)**, or **Word (`.docx`)**.
+- **Multi-Provider & Free Tier Support**: Works seamlessly with **OpenRouter** (including free models like NVIDIA Nemotron-3-Super 120B), **Google Gemini**, **OpenAI**, and **Anthropic**.
+- **Strict 1-Page Layout Guarantee**: Typeset with `extarticle` at 9pt typography and compact geometry margins to ensure a clean, high-density 1-page PDF.
 - **Enterprise Career Portal Scraper**: Extracts jobs from career sites (Allianz, Workday, Greenhouse, Lever) via Schema.org `JobPosting` JSON-LD, with automated fallback for bot-protected pages.
-- **Google X-Y-Z Bullet Optimization**: Restructures experience bullets to follow the *"Accomplished [X] as measured by [Y], by doing [Z]"* framework.
+- **Action-Oriented Impact Bullets**: Rewrites experience bullets to highlight quantifiable impact, tools, and technical leadership without repetitive formulaic filler.
 - **Strict Anti-Hallucination**: Tailors vocabulary and emphasis without inventing unheld job titles, false degrees, or fake accomplishments.
 - **Native LaTeX Workflow**: Automatically updates your `.tex` source and compiles a publication-ready `.pdf` via `pdflatex` with verified, clickable web links.
 - **Automated Cover Letter Generator**: Crafts an articulate, matching 1-page cover letter connecting your technical background to the target company's challenges, compiled directly to `cover_letter.pdf`.
 - **Match Analysis & Interview Prep Kit**: Generates a strategic dossier (`analysis.md`) featuring ATS match metrics, skill gaps, resume change audit logs, targeted technical/behavioral interview questions with talking points, and smart questions to ask the interviewer.
 - **Clean Application Tree**: Organizes each job application into its own dedicated folder (`applications/<Company>/`) with tailored resume, cover letter, analysis report, and archived job description.
 - **Interactive Terminal Assistant**: Zero-friction wizard for new users—no long flags required.
-
-
 
 ---
 
@@ -73,7 +73,7 @@ cd resume-tailor
 uv sync --all-extras
 ```
 
-### 2. Configure Your Gemini API Key
+### 2. Configure Your API Key
 
 Copy `.env.example` to `.env`:
 
@@ -81,11 +81,21 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 
-Add your Gemini API key in `.env`:
+Configure your preferred LLM provider in `.env`:
 
 ```dotenv
-LLM_MODEL=gemini/gemini-3.6-flash
-GEMINI_API_KEY=your_gemini_api_key_here
+# Option A: OpenRouter (Free models available)
+LLM_MODEL=openrouter/nvidia/nemotron-3-super-120b-a12b:free
+OPENROUTER_API_KEY=sk-or-v1-your_openrouter_key_here
+
+# Option B: Google Gemini
+# LLM_MODEL=gemini/gemini-3.6-flash
+# GEMINI_API_KEY=your_gemini_key_here
+
+# Option C: OpenAI
+# LLM_MODEL=openai/gpt-4o-mini
+# OPENAI_API_KEY=your_openai_key_here
+
 DEFAULT_OUTPUT_DIR=./applications
 ```
 
@@ -180,7 +190,7 @@ applications/
 | `--cover-letter` | | `True` | Generate matching tailored cover letter (`.tex` & `.pdf`) |
 | `--analysis` | | `True` | Generate match analysis & interview prep kit (`analysis.md`) |
 | `--output` | `-o` | `applications/<Company>/` | Custom destination file or directory |
-| `--model` | `-m` | `gemini/gemini-3.6-flash` | Override default LLM model |
+| `--model` | `-m` | From `.env` | Override default LLM model (`openrouter/...`, `gemini/...`, `openai/...`) |
 | `--dry-run` | | `False` | Preview match score and diff table without writing files |
 | `--debug` | | `False` | Enable verbose debug logs and stack traces |
 
